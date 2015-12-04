@@ -40,14 +40,15 @@ void binarizationImage(int **p,int imgHeight,int imgWidth,GBufferedImage* img){
  *@param - The old value of the found item.
  *@param - The height of the source image.
  *@param - The width of the source image.
+ *@param - The minimum size of the silhouette.
  * */
-void fill(int y,int x,int newValue,int oldValue,int **p,int imgHeight,int imgWidth){
+void fill(int y,int x,int newValue,int oldValue,int **p,int imgHeight,int imgWidth,int &minSizeSilhouettes){
     if(x >= 0 && x < imgWidth && y >= 0 && y < imgHeight && p[y][x] == oldValue && p[y][x] != newValue){
         p[y][x] = newValue;
-        fill(y,x+1,newValue,oldValue,p,imgHeight,imgWidth);
-        fill(y,x-1,newValue,oldValue,p,imgHeight,imgWidth);
-        fill(y-1,x,newValue,oldValue,p,imgHeight,imgWidth);
-        fill(y+1,x,newValue,oldValue,p,imgHeight,imgWidth);
+        fill(y,x+1,newValue,oldValue,p,imgHeight,imgWidth,minSizeSilhouettes);
+        fill(y,x-1,newValue,oldValue,p,imgHeight,imgWidth,minSizeSilhouettes);
+        fill(y-1,x,newValue,oldValue,p,imgHeight,imgWidth,minSizeSilhouettes);
+        fill(y+1,x,newValue,oldValue,p,imgHeight,imgWidth,minSizeSilhouettes);
     }
 
 
@@ -92,13 +93,18 @@ void findingNumberSilhouettesInImage(string nameImage){
         for(int j = 1;j < imgWidth;j++){
             if(p[i][j] == 1){
                 newValue++;
-                cur++;
-                fill(i,j,newValue,oldValue,p,imgHeight,imgWidth);
+                int minSizeSilhouettes = 0;
+                fill(i,j,newValue,oldValue,p,imgHeight,imgWidth,minSizeSilhouettes);
+                if(minSizeSilhouettes>1000){
+                    cur++;
+                }
             }
         }
     }
+
     //result output.
     cout<<cur<<endl;
+
     //Cleaning heap.
     for(int i(0);i<imgHeight;i++){
         delete[]p[i];
