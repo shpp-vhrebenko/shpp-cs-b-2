@@ -7,6 +7,9 @@ using namespace std;
 
 //The variable specifies the color threshold for image binarization
 const int THRESHOLD_COLOR = 12566463;//color HEX:  #b7b7b7
+// The minimum size that counts.
+const int MIN_SIZE_SILHOUETTE = 1000;
+
 
 /*
  * The function of the original image binarization
@@ -42,13 +45,14 @@ void binarizationImage(int **p,int imgHeight,int imgWidth,GBufferedImage* img){
  *@param - The width of the source image.
  *@param - The minimum size of the silhouette.
  * */
-void fill(int y,int x,int newValue,int oldValue,int **p,int imgHeight,int imgWidth,int &minSizeSilhouettes){
+void fill(int y,int x,int newValue,int oldValue,int **p,int imgHeight,int imgWidth,int & sizeSilhouette){
     if(x >= 0 && x < imgWidth && y >= 0 && y < imgHeight && p[y][x] == oldValue && p[y][x] != newValue){
         p[y][x] = newValue;
-        fill(y,x+1,newValue,oldValue,p,imgHeight,imgWidth,minSizeSilhouettes);
-        fill(y,x-1,newValue,oldValue,p,imgHeight,imgWidth,minSizeSilhouettes);
-        fill(y-1,x,newValue,oldValue,p,imgHeight,imgWidth,minSizeSilhouettes);
-        fill(y+1,x,newValue,oldValue,p,imgHeight,imgWidth,minSizeSilhouettes);
+        sizeSilhouette++;
+        fill(y,x+1,newValue,oldValue,p,imgHeight,imgWidth,sizeSilhouette);
+        fill(y,x-1,newValue,oldValue,p,imgHeight,imgWidth,sizeSilhouette);
+        fill(y-1,x,newValue,oldValue,p,imgHeight,imgWidth,sizeSilhouette);
+        fill(y+1,x,newValue,oldValue,p,imgHeight,imgWidth,sizeSilhouette);
     }
 
 
@@ -58,7 +62,7 @@ void fill(int y,int x,int newValue,int oldValue,int **p,int imgHeight,int imgWid
 /*
  * @param The name of the original image file (name.jpg).
  * */
-void findingNumberSilhouettesInImage(string nameImage){
+void countSilhouettes (string nameImage){
     //Creating an object - the image and placing it in the source file.
     GImage* image;
     image = new GImage(nameImage);
@@ -93,9 +97,10 @@ void findingNumberSilhouettesInImage(string nameImage){
         for(int j = 1;j < imgWidth;j++){
             if(p[i][j] == 1){
                 newValue++;
-                int minSizeSilhouettes = 0;
-                fill(i,j,newValue,oldValue,p,imgHeight,imgWidth,minSizeSilhouettes);
-                if(minSizeSilhouettes>1000){
+                int sizeSilhouette = 0;
+                fill(i,j,newValue,oldValue,p,imgHeight,imgWidth,sizeSilhouette);
+                cout<<sizeSilhouette<<endl;
+                if(sizeSilhouette>MIN_SIZE_SILHOUETTE){
                     cur++;
                 }
             }
@@ -127,7 +132,7 @@ int main() {
                 return -1;
             }
             else{
-            findingNumberSilhouettesInImage(str);
+                countSilhouettes (str);
             }
         }
 
